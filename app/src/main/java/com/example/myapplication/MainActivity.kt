@@ -1,11 +1,14 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.os.Parcelable
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.Model
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,13 +16,55 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
+import kotlinx.parcelize.Parcelize
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DefaultPreview()
+            MaterialTheme(colors = lightThemeColors) {
+//                LifecycleDemo(CounterState2(1))
+
+                ScoreView(
+                    Score("Corinthians", 1, "Santos", 0)
+                )
+            }
         }
+    }
+}
+
+data class CounterState2(var count: Int = 0)
+
+//var count =  MutableLiveData(0)
+//private val _message = MutableLiveData("Hi $userId")
+//private val test4 = MutableLiveData(CounterState2(1))
+@Composable
+fun LifecycleDemo(test: CounterState2) {
+//    val score = CounterState() //rememberSaveable { mutableStateOf(CounterState(1))}
+    val count = remember { mutableStateOf(test.count) }
+
+
+    Column {
+        Button(onClick = {
+            count.value++
+
+        }) {
+            Text("Click me")
+        }
+
+//        if (count.value < 3) {
+            SideEffect {
+                Log.d("Compose", "onactive with value: " + count.value)
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    Log.d("Compose", "onDispose because value=" + count.value)
+                }
+            }
+
+            Text(text = "You have clicked the button: " + count.value)
+//        }
     }
 }
 
@@ -101,7 +146,9 @@ fun TeamScore(
 }
 
 // Opção 2
-data class Score(
+
+@Model
+class Score(
     val homeTeam: String,
     var homeScore: Int,
     val visitorTeam: String,
@@ -110,17 +157,21 @@ data class Score(
 
 @Composable
 fun ScoreView(score: Score) {
+    val homeScore = remember { mutableStateOf(score.homeScore) }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
-            Row(modifier = Modifier.weight(1.0f).fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
+            Row(modifier = Modifier
+                .weight(1.0f)
+                .fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
                 TeamScore(
                     team = score.homeTeam,
-                    score = score.homeScore,
+                    score = homeScore.value,
                     onUpdate = { newScore ->
-                        score.homeScore = newScore
+                        homeScore.value = newScore
                     }
                 )
             }
@@ -133,7 +184,9 @@ fun ScoreView(score: Score) {
                     color = Color.Red
                 )
             )
-            Row(modifier = Modifier.weight(1.0f).fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
+            Row(modifier = Modifier
+                .weight(1.0f)
+                .fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
                 TeamScore(
                     team = score.visitorTeam,
                     score = score.visitorScore,
@@ -146,7 +199,7 @@ fun ScoreView(score: Score) {
         OutlinedButton(
 
             onClick = {
-                score.homeScore = 0
+                homeScore.value = 0
                 score.visitorScore = 0
             }
         ) {
@@ -161,7 +214,7 @@ fun ScoreView(score: Score) {
 fun DefaultPreview() {
     MaterialTheme(colors = lightThemeColors) {
         ScoreView(
-            Score("Corinthians", 0, "Santos", 0)
+            Score("Corinthians", 1, "Santos", 0)
         )
     }
 }
