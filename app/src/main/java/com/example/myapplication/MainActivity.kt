@@ -154,7 +154,7 @@ class Score(
     val visitorTeam: String,
     var visitorScore: Int
 )
-sasa
+
 @Composable
 fun ScoreView(score: Score) {
     val homeScore = remember { mutableStateOf(score.homeScore) }
