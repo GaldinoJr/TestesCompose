@@ -18,6 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.livedata.observeAsState
 import com.example.myapplication.lightThemeColors
 
 class GameScoreActivity: ComponentActivity() {
@@ -34,9 +35,9 @@ class GameScoreActivity: ComponentActivity() {
 
     @Composable
     fun ScoreView(score: Score) {
-        val homeScore = remember { mutableStateOf(score.homeScore) }
-        val visitorScore = remember { mutableStateOf(score.visitorScore) }
-
+//        https://developer.android.com/reference/kotlin/androidx/compose/runtime/livedata/package-summary
+        val homeScore = score.homeScore.observeAsState()
+        val visitorScore = score.visitorScore.observeAsState()
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -47,9 +48,9 @@ class GameScoreActivity: ComponentActivity() {
                     .fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
                     TeamScore(
                         team = score.homeTeam,
-                        score = homeScore.value,
+                        score = homeScore.value!!,
                         onUpdate = { newScore ->
-                            homeScore.value = newScore
+                            score.homeScore.value = newScore
                         }
                     )
                 }
@@ -67,9 +68,9 @@ class GameScoreActivity: ComponentActivity() {
                     .fillMaxWidth(),  horizontalArrangement = Arrangement.Center) {
                     TeamScore(
                         team = score.visitorTeam,
-                        score = visitorScore.value,
+                        score = visitorScore.value!!,
                         onUpdate = { newScore ->
-                            visitorScore.value = newScore
+                            score.visitorScore.value = newScore
                         }
                     )
                 }
@@ -77,8 +78,8 @@ class GameScoreActivity: ComponentActivity() {
             OutlinedButton(
 
                 onClick = {
-                    homeScore.value = 0
-                    visitorScore.value = 0
+                    score.homeScore.value = 0
+                    score.visitorScore.value = 0
                 }
             ) {
                 Text("Reset")
